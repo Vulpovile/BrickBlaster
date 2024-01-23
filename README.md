@@ -21,7 +21,7 @@ You require:
 Use your mouse to control your paddle, click to fire, wheel to aim when firing, that's it!  
 R - Reset/Start  
 C - Continue  
-Mouse - Paddle__  
+Mouse - Paddle  
 Wheel - Aim
 
 ## Brick Colors
