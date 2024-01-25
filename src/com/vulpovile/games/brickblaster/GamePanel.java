@@ -24,6 +24,8 @@ import javax.swing.JPanel;
 
 import com.vulpovile.games.brickblaster.beep.BeepSoundSystem;
 import com.vulpovile.games.brickblaster.game.Ball;
+import com.vulpovile.games.brickblaster.game.PowerUp;
+import com.vulpovile.games.brickblaster.game.powerups.MultiBall;
 
 /**
  * Yes I am aware the code for this is horrific
@@ -47,7 +49,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	private VolatileImage frameBuffer = null;
 
-	public static long ticks = 0;
+	public static int ticks = 0;
 
 	private short resetTicks = -1;
 
@@ -62,7 +64,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 
 	private ArrayList<Ball> balls = new ArrayList<Ball>(8);
 
-	private String[] levels = new String[] {"intro.bbl", "stagger.bbl", "smiley.bbl", "half.bbl", "challenger.bbl", "heart.bbl", "full.bbl", "hole.bbl", "trickshot.bbl", "chekkit.bbl" };
+	private String[] levels = new String[] { "intro.bbl", "stagger.bbl", "smiley.bbl", "half.bbl", "challenger.bbl", "heart.bbl", "full.bbl", "hole.bbl", "trickshot.bbl", "chekkit.bbl" };
 	private int currLevel = 0;
 
 	private int toHit = -1;
@@ -74,6 +76,8 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	Robot robot = null;
 
 	private Rectangle repaintRegion = null;
+
+	private ArrayList<PowerUp> fallingPowerUps = new ArrayList<PowerUp>();
 
 	//Functions
 
@@ -142,6 +146,24 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(W - (W >> 7), 0, (W >> 7), H);
 
+		for (int i = 0; i < fallingPowerUps.size(); i++)
+		{
+			PowerUp powerUp = fallingPowerUps.get(i);
+			int gapX = powerUp.pupHalfHeight >> 2;
+			int gapY = powerUp.pupHalfHeight >> 1;
+			g2d.setColor(powerUp.color);
+			g2d.fillRect(powerUp.x - powerUp.pupHalfWidth, powerUp.y - powerUp.pupHalfHeight, powerUp.pupHalfWidth << 1, powerUp.pupHalfHeight << 1);
+			g2d.setColor(powerUp.color.darker());
+			g2d.fillRect(powerUp.x - powerUp.pupHalfWidth + gapw, powerUp.y - powerUp.pupHalfHeight + gaph, (powerUp.pupHalfWidth << 1) - gapw, (powerUp.pupHalfHeight << 1) - gaph);
+
+			int linePos = ticks % (powerUp.pupHalfWidth << 1);
+			if (linePos << 1 < (powerUp.pupHalfWidth << 1))
+			{
+				g2d.setColor(Color.WHITE);
+				g2d.fillRect(powerUp.x - powerUp.pupHalfWidth + (linePos << 1), powerUp.y - powerUp.pupHalfHeight, gaph, powerUp.pupHalfHeight << 1);
+			}
+		}
+
 		g2d.setColor(Color.GRAY);
 		g2d.fillRect(paddle - paddleHalfWidth, H - (H / 16), paddleHalfWidth << 1, (H - H / 2) / 16);
 		g2d.setColor(Color.WHITE.darker());
@@ -179,10 +201,36 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 	public void tick() {
-		//ticks++;
+		ticks++;
 
 		if (toHit > 0 && resetTicks <= -1 && ballsLeft > 0)
 		{
+			for (int i = fallingPowerUps.size() - 1; i >= 0; i--)
+			{
+				PowerUp powerUp = fallingPowerUps.get(i);
+				addRepaintRegion(new Rectangle(powerUp.x - powerUp.pupHalfWidth, powerUp.y - powerUp.pupHalfHeight, powerUp.pupHalfWidth << 1, powerUp.pupHalfHeight << 1));
+				powerUp.y += H >> 7;
+				if (powerUp.y > H)
+				{
+					fallingPowerUps.remove(i);
+					continue;
+				}
+				if (/*Check height*/
+				powerUp.y + powerUp.pupHalfHeight > H - (H / 16) && powerUp.y - powerUp.pupHalfHeight < (H - (H / 16)) + ((H - H / 2) / 16)
+				/*Check Paddle Alignment*/
+				&& powerUp.x > paddle - paddleHalfWidth - powerUp.pupHalfWidth && powerUp.x < paddle + paddleHalfWidth + powerUp.pupHalfWidth)
+				{
+					sound.note(1200, 15, 0.5, 2);
+					sound.note(1600, 15, 0.5, 2);
+					
+					powerUp.onObtain(this);
+					
+					fallingPowerUps.remove(i);
+					continue;
+				}
+				addRepaintRegion(new Rectangle(powerUp.x - powerUp.pupHalfWidth, powerUp.y - powerUp.pupHalfHeight, powerUp.pupHalfWidth << 1, powerUp.pupHalfHeight << 1));
+			}
+
 			nextBall: for (int i = 0; i < balls.size(); i++)
 			{
 				Ball ball = balls.get(i);
@@ -236,6 +284,11 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 								toHit--;
 								field[index1] = 0;
 								addRepaintRegion(new Rectangle(xIdx1 * w, yIdx * h, w, h));
+								PowerUp powerUp = new MultiBall();
+								powerUp.x = ball.ballX;
+								powerUp.y = ball.ballY;
+								addRepaintRegion(new Rectangle(powerUp.x - powerUp.pupHalfWidth, powerUp.y - powerUp.pupHalfHeight, powerUp.pupHalfWidth << 1, powerUp.pupHalfHeight << 1));
+								this.fallingPowerUps.add(powerUp);
 							}
 							ball.ballYVelocity = -ball.ballYVelocity;
 
@@ -290,7 +343,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 						int index2 = (yIdx2 * 8) + xIdx;
 
 						//BaLL hIt!1! (x)
-						if (yIdx1 < 16 && xIdx > 0 && xIdx < 8 && field[index1] > 0)
+						if (yIdx1 < 16 && xIdx >= 0 && xIdx < 8 && field[index1] > 0)
 						{
 							ball.ballX -= Math.signum(ball.ballXVelocity);
 							int val = field[index1];
@@ -305,7 +358,7 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 							sound.note(100 * (val + 2), 25, 0.25, 1);
 							break nextBall;
 						}
-						else if (yIdx2 < 16 && xIdx > 0 && xIdx < 8 && field[index2] > 0)
+						else if (yIdx2 < 16 && xIdx >= 0 && xIdx < 8 && field[index2] > 0)
 						{
 							ball.ballX -= Math.signum(ball.ballXVelocity);
 							int val = field[index2];
@@ -584,5 +637,9 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 				break;
 			}
 		}
+	}
+
+	public ArrayList<Ball> getBalls() {
+		return this.balls;
 	}
 }
