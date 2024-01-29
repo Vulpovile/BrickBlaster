@@ -5,7 +5,7 @@ import com.vulpovile.games.brickblaster.GamePanel;
 public class Ball {
 	public static final short BALL_MAGIC = (short)0xBA11;
 	
-	public boolean superBall = false;
+	public boolean superBall = true;
 	
 	public int ballX = 0;
 	public int ballY = BALL_MAGIC;

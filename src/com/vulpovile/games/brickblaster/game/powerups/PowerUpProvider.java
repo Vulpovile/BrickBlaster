@@ -24,12 +24,12 @@ public class PowerUpProvider {
 
 	static
 	{
-		addProbability(1, 200);
+		addProbability(0, 60);
+		addProbability(1, 100);
 		addProbability(2, 100);
-		addProbability(3, 100);
-		addProbability(4, 110);
-		addProbability(5, 90);
-		addProbability(6, 70);
+		addProbability(3, 110);
+		addProbability(4, 90);
+		addProbability(5, 70);
 	}
 
 	private static PowerUp fromID(byte itemID) {
@@ -38,18 +38,18 @@ public class PowerUpProvider {
 				return new ExtraBall();
 			case 1:
 				return new InvertScreen();
-			case 3:
+			case 2:
 				return new MultiBall();
-			case 4:
+			case 3:
 				return new PaddleExtend();
-			case 5:
+			case 4:
 				return new PaddleShrink();
-			case 6:
+			case 5:
 				return new SuperBall();
 		}
 		return null;
 	}
-
+	
 	public static PowerUp providePowerUp(int x, int y, byte tile) {
 		if (random.nextInt(5) == 0)
 		{
@@ -57,7 +57,7 @@ public class PowerUpProvider {
 			int offset = 0;
 			for (Map.Entry<Byte, Integer> item : pupTable.entrySet())
 			{
-				if (item.getValue() + offset > prob)
+				if (prob < offset + item.getValue())
 				{
 					PowerUp pup = fromID(item.getKey());
 					if (pup != null)
