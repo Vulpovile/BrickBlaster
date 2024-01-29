@@ -23,8 +23,8 @@ public class GameBase extends JPanel implements ActionListener {
 	public static final char ERA = 'a';
 	public static final byte GENERATION = 0;
 	public static final byte MAJOR_VERSION = 0;
-	public static final byte MINOR_VERSION = 3;
-	public static final byte PATCH_VERSION = -2;
+	public static final byte MINOR_VERSION = 4;
+	public static final byte PATCH_VERSION = 0;
 	public static final String PRODUCT_NAME = "BrickBlaster";
 
 	public GameTickThread gameTickThread;
