@@ -54,15 +54,16 @@ public class GameBase extends JPanel implements ActionListener {
 		JMenuBar menuBar = new JMenuBar();
 		toolBar.add(menuBar);
 
+		JMenu mnFile = new JMenu("File");
+		menuBar.add(mnFile);
+		mnFile.add(mntmOpen);
+		mntmOpen.addActionListener(this);
+		
 		JMenu mnHelp = new JMenu("Help");
 		menuBar.add(mnHelp);
 		mntmAbout.addActionListener(this);
 		mnHelp.add(mntmAbout);
 
-		JMenu mnFile = new JMenu("File");
-		menuBar.add(mnFile);
-		mnFile.add(mntmOpen);
-		mntmOpen.addActionListener(this);
 
 		sound.note(200, 150, 0.2, 0);
 		sound.note(300, 150, 0.2, 0);
