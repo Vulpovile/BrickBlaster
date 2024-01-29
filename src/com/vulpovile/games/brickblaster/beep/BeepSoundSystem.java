@@ -10,9 +10,13 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 
 public class BeepSoundSystem {
+	public final static byte TYPE_SQUARE = 0;
+	public final static byte TYPE_SINE = 1;
+	public final static byte TYPE_NOISE = 2;
+	public final static byte TYPE_GRATE = 4;
 
-	public static final float SAMPLE_RATE = 8000f;
-	public static final int SAMPLE_COUNT = (int) Math.ceil(SAMPLE_RATE/1000);
+	public static final float SAMPLE_RATE = 14000f;
+	public static final int SAMPLE_COUNT = (int) Math.ceil(SAMPLE_RATE / 1000);
 	private static BeepSoundSystem instance = null;
 
 	private boolean running = true;
@@ -42,9 +46,13 @@ public class BeepSoundSystem {
 	}
 
 	public void note(int hz, int msecs, double vol, int channel) {
-		this.channels[channel].note(hz, msecs, vol);
+		this.channels[channel].note(hz, msecs, (float) vol, TYPE_SINE);
 	}
 
+	public void note(int hz, int msecs, double vol, int channel, byte type) {
+		this.channels[channel].note(hz, msecs, (float) vol, type);
+	}
+	
 	private class Channel implements Runnable {
 		private BlockingQueue<Note> noteQueue = null;
 		private SourceDataLine sdl = null;
@@ -72,7 +80,7 @@ public class BeepSoundSystem {
 		}
 
 		public void destroy() {
-			if(parentThread != null)
+			if (parentThread != null)
 				parentThread.interrupt();
 			noteQueue = null;
 			if (sdl != null)
@@ -83,24 +91,68 @@ public class BeepSoundSystem {
 			}
 		}
 
-		public void note(int hz, int msecs, double vol) {
+		public void note(int hz, int msecs, float vol, byte type) {
 			if (noteQueue != null)
 			{
-				noteQueue.add(new Note(hz, msecs, vol));
+				noteQueue.add(new Note(hz, msecs, vol, type));
 			}
 		}
 
-		private void tone(int hz, int msecs, double vol) throws LineUnavailableException {
+		private void sine(int hz, int msecs, float vol) throws LineUnavailableException {
 			if (sdl != null)
 			{
 				byte[] buf = new byte[1];
 				for (int i = 0; i < msecs * SAMPLE_COUNT; i++)
 				{
-					double angle = i / (SAMPLE_RATE / hz) * 2.0 * Math.PI;
-					buf[0] = (byte) (Math.sin(angle) * 127.0 * vol);
+					float angle = i / (SAMPLE_RATE / hz) * 2.0F * 3.14159F;
+					buf[0] = (byte) (Math.sin(angle) * 127.0F * vol);
 					sdl.write(buf, 0, 1);
 				}
-				sdl.drain();
+			}
+		}
+
+		private void square(int hz, int msecs, float vol) throws LineUnavailableException {
+			if (sdl != null)
+			{
+				byte[] buf = new byte[1];
+				for (int i = 0; i < msecs * SAMPLE_COUNT; i++)
+				{
+					float angle = i / (SAMPLE_RATE / hz) * 2.0F * 3.14159F;
+					buf[0] = (byte) (Math.signum(Math.sin(angle)) * 127.0F * vol);
+					sdl.write(buf, 0, 1);
+				}
+			}
+		}
+
+		byte reverse(int b) {
+			   	b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+				b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+				b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+				return (byte)b;
+		}
+
+		private void grate(int hz, int msecs, float vol) throws LineUnavailableException {
+			if (sdl != null)
+			{
+				byte[] buf = new byte[1];
+				for (int i = 0; i < msecs * SAMPLE_COUNT; i++)
+				{
+					float angle = i / (SAMPLE_RATE / hz) * 2.0F * 3.14159F;
+					buf[0] = reverse((byte) (Math.sin(angle) * 127.0F * vol));
+					sdl.write(buf, 0, 1);
+				}
+			}
+		}
+		
+		private void noise(int hz, int msecs, float vol) throws LineUnavailableException {
+			//TODO implement
+			try
+			{
+				Thread.sleep(msecs);
+			}
+			catch (InterruptedException e)
+			{
+				e.printStackTrace();
 			}
 		}
 
@@ -114,7 +166,20 @@ public class BeepSoundSystem {
 					{
 						try
 						{
-							tone(note.hz, note.msecs, note.vol);
+							switch (note.type) {
+								case TYPE_SQUARE:
+									square(note.hz, note.msecs, note.vol);
+									break;
+								case TYPE_SINE:
+									sine(note.hz, note.msecs, note.vol);
+									break;
+								case TYPE_NOISE:
+									noise(note.hz, note.msecs, note.vol);
+									break;
+								case TYPE_GRATE:
+									grate(note.hz, note.msecs, note.vol);
+									break;
+							}
 						}
 						catch (LineUnavailableException e)
 						{
@@ -128,16 +193,19 @@ public class BeepSoundSystem {
 			}
 		}
 	}
-}
 
-class Note {
-	public final int hz;
-	public final int msecs;
-	public final double vol;
+	public class Note {
 
-	public Note(int hz, int msecs, double vol) {
-		this.hz = hz;
-		this.msecs = msecs;
-		this.vol = vol;
+		public final int hz;
+		public final int msecs;
+		public final float vol;
+		public final byte type;
+
+		public Note(int hz, int msecs, float vol, byte type) {
+			this.hz = hz;
+			this.msecs = msecs;
+			this.vol = vol;
+			this.type = type;
+		}
 	}
 }
