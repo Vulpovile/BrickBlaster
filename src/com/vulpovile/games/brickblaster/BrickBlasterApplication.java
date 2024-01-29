@@ -17,7 +17,7 @@ public class BrickBlasterApplication extends JFrame implements WindowListener, A
 
 	public BrickBlasterApplication() {
 		super(String.format("%s - %s%d.%d.%d", GameBase.PRODUCT_NAME, GameBase.ERA, GameBase.GENERATION, GameBase.MAJOR_VERSION, GameBase.MINOR_VERSION));
-		if(GameBase.PATCH_VERSION > 0)
+		if(GameBase.PATCH_VERSION != 0)
 		{
 			this.setTitle(this.getTitle() + String.format("_%02d", GameBase.PATCH_VERSION));
 		}

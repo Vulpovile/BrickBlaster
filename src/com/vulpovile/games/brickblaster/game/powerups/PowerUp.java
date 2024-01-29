@@ -1,4 +1,4 @@
-package com.vulpovile.games.brickblaster.game;
+package com.vulpovile.games.brickblaster.game.powerups;
 
 import java.awt.Color;
 
@@ -10,14 +10,16 @@ public abstract class PowerUp {
 	public final int pupHalfHeight = (GamePanel.H >> 5) - (GamePanel.H >> 6);
 
 	public final Color color;
+	public final boolean nerf;
 	
-	public short expiresIn = 0;
+	public short expiresIn = POWERUP_MAGIC;
 	public int x = POWERUP_MAGIC;
 	public int y = 0;
 	
-	public PowerUp(Color color)
+	public PowerUp(Color color, boolean nerf)
 	{
 		this.color = color;
+		this.nerf = nerf;
 	}
 
 	public abstract void onExpire(GamePanel g);

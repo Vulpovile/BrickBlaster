@@ -1,16 +1,16 @@
-package com.vulpovile.games.brickblaster.game.powerups;
+package com.vulpovile.games.brickblaster.game.powerups.impl;
 
 import java.awt.Color;
 import java.util.ArrayList;
 
 import com.vulpovile.games.brickblaster.GamePanel;
 import com.vulpovile.games.brickblaster.game.Ball;
-import com.vulpovile.games.brickblaster.game.PowerUp;
+import com.vulpovile.games.brickblaster.game.powerups.PowerUp;
 
 public class MultiBall extends PowerUp{
 
 	public MultiBall() {
-		super(Color.BLUE);
+		super(Color.BLUE, false);
 	}
 
 	@Override
