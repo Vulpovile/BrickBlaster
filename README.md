@@ -1,7 +1,7 @@
 # BrickBlaster - A classic brick destruction game!
 A classic brick-destroying game! Aim your paddle to bounce the ball against the wall and break each brick, the angle you hit matters!  
 Be careful not to miss! You only have 5 balls!  
-You can get the Level Builder at https://github.com/Vulpovile/BrickBlasterLevelBuilder
+You can get the Level Builder at https://github.com/Vulpovile/BrickBlaster-LevelBuilder
 
 ## THIS SOFTWARE HAS MILDLY OK CODE
 Yes I am aware the code for this is not great  
