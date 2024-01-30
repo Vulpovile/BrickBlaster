@@ -14,7 +14,7 @@ public abstract class LevelLoader {
 		loadStandardLevelFromStream(stream, destination, 0);
 	}
 
-	protected final void loadStandardLevelFromStream(InputStream stream, byte[] destination, int offset) throws IOException {
+	protected final boolean loadStandardLevelFromStream(InputStream stream, byte[] destination, int offset) throws IOException {
 		if (offset > 0)
 			stream.skip(offset * (destination.length >> 1));
 		for (int i = 0; i < destination.length; i += 2)
@@ -22,10 +22,12 @@ public abstract class LevelLoader {
 			int read = stream.read();
 			if (read != -1)
 			{
-				destination[i] = (byte) (read & 0x0F);
-				destination[i + 1] = (byte) ((read & 0xF0) >> 4);
+				destination[i] = (byte) (read & 0x07);
+				destination[i + 1] = (byte) ((read & 0x70) >> 4);
 			}
+			else return true;
 		}
+		return false;
 	}
 
 	protected final int calculateHitables(byte[] field) {

@@ -481,20 +481,28 @@ public class GamePanel extends JPanel implements MouseListener, MouseMotionListe
 			sound.note(400, 100, 0.2, 0);
 			sound.note(500, 100, 0.2, 1);
 
-			sound.note(0, 20, 0.2, 0);
-			sound.note(0, 20, 0.2, 1);
+			sound.note(0, 100, 0.2, 0);
+			sound.note(0, 100, 0.2, 1);
 
 			sound.note(400, 50, 0.2, 0);
 			sound.note(500, 50, 0.2, 1);
+			sound.note(0, 20, 0.2, 0);
+			sound.note(0, 20, 0.2, 1);
 
 			sound.note(500, 300, 0.2, 0);
 			sound.note(600, 300, 0.2, 1);
+			sound.note(0, 20, 0.2, 0);
+			sound.note(0, 20, 0.2, 1);
 
 			sound.note(600, 300, 0.2, 0);
 			sound.note(800, 300, 0.2, 1);
+			sound.note(0, 20, 0.2, 0);
+			sound.note(0, 20, 0.2, 1);
 
 			sound.note(1000, 300, 0.2, 0);
 			sound.note(800, 300, 0.2, 1);
+			sound.note(0, 20, 0.2, 0);
+			sound.note(0, 20, 0.2, 1);
 
 			sound.note(1200, 300, 0.2, 0);
 			sound.note(1000, 300, 0.2, 1);

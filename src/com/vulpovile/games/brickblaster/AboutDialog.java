@@ -100,6 +100,5 @@ public class AboutDialog extends JDialog {
 				dispose();
 			}
 		});
-
 	}
 }
